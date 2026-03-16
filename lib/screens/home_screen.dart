@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E1A),
+
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
@@ -28,20 +29,25 @@ class _HomeScreenState extends State<HomeScreen> {
           FavoritesScreen(),
         ],
       ),
+
       bottomNavigationBar: Container(
+
         decoration: BoxDecoration(
           color: const Color(0xFF0D1220),
           border: Border(
             top: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
           ),
         ),
+
         child: SafeArea(
           child: SizedBox(
             height: 64,
+
             child: Row(
               children: List.generate(_tabs.length, (i) {
                 final tab = _tabs[i];
                 final selected = _selectedIndex == i;
+
                 return Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedIndex = i),
@@ -49,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+
                         Icon(
                           tab.icon,
                           color: selected
@@ -56,7 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               : Colors.white38,
                           size: 24,
                         ),
+
                         const SizedBox(height: 4),
+
                         Text(
                           tab.label,
                           style: TextStyle(
@@ -69,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : FontWeight.normal,
                           ),
                         ),
+                        
                       ],
                     ),
                   ),

@@ -11,7 +11,9 @@ class FavoritesScreen extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
+
           _buildHeader(),
+
           Expanded(
             child: Consumer<FavoritesProvider>(
               builder: (context, provider, _) {
@@ -26,9 +28,11 @@ class FavoritesScreen extends StatelessWidget {
                   itemCount: favorites.length,
                   itemBuilder: (_, i) => MatchCard(match: favorites[i]),
                 );
+
               },
             ),
           ),
+
         ],
       ),
     );
@@ -42,15 +46,18 @@ class FavoritesScreen extends StatelessWidget {
 
           Container(
             padding: const EdgeInsets.all(8),
+
             decoration: BoxDecoration(
               color: const Color(0xFFFFD700).withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
+
             child: const Icon(
               Icons.star,
               color: Color(0xFFFFD700),
               size: 20,
             ),
+            
           ),
 
           const SizedBox(width: 12),

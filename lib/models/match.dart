@@ -33,20 +33,35 @@ class Match {
     this.sport = 'football',
   });
 
-  bool get isLive =>
-      status.toLowerCase().contains('live') ||
-      status.toLowerCase().contains('1h') ||
-      status.toLowerCase().contains('2h') ||
-      status.toLowerCase().contains('ht') ||
-      status == 'inprogress' ||
-      status == 'in_progress';
+  bool get isLive {
+    final s = status.toLowerCase();
+    return s == 'inprogress' ||
+        s == 'in_progress' ||
+        s == 'live' ||
+        s == '1st' ||
+        s == '2nd' ||
+        s == 'ht' ||
+        s == 'ot' ||
+        s == 'overtime' ||
+        s.contains('inprogress') ||
+        s.contains('live') ||
+        s.contains('1h') ||
+        s.contains('2h') ||
+        s.contains('halftime');
+  }
 
-  bool get isFinished =>
-      status.toLowerCase().contains('fin') ||
-      status.toLowerCase().contains('ended') ||
-      status.toLowerCase() == 'ft' ||
-      status.toLowerCase() == 'aet' ||
-      status.toLowerCase() == 'pen';
+  bool get isFinished {
+    final s = status.toLowerCase();
+    return s == 'finished' ||
+        s == 'ended' ||
+        s == 'complete' ||
+        s == 'ft' ||
+        s == 'aet' ||
+        s == 'pen' ||
+        s == 'fin' ||
+        s.contains('finish') ||
+        s.contains('ended');
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -83,84 +98,189 @@ class Match {
       );
 
   factory Match.fromApiJson(Map<String, dynamic> json, String sport) {
-    final homeTeam = json['HomeTeam'] ?? json['home_team'] ?? json['home'] ?? {};
-    final awayTeam = json['AwayTeam'] ?? json['away_team'] ?? json['away'] ?? {};
-    final score = json['Score'] ?? json['score'] ?? {};
-    final league = json['League'] ?? json['league'] ?? json['tournament'] ?? {};
 
-    String homeTeamName = '';
-    String awayTeamName = '';
-    String? homeTeamLogo;
-    String? awayTeamLogo;
+    final homeTeamRaw =
+        json['homeTeam'] ?? json['HomeTeam'] ?? json['home_team'] ?? json['home'] ?? {};
+    final awayTeamRaw =
+        json['awayTeam'] ?? json['AwayTeam'] ?? json['away_team'] ?? json['away'] ?? {};
+
+    String homeTeamName =
+        _extractName(homeTeamRaw) ?? json['homeTeamName']?.toString() ?? 'Home Team';
+    String awayTeamName =
+        _extractName(awayTeamRaw) ?? json['awayTeamName']?.toString() ?? 'Away Team';
+    String? homeTeamLogo = _extractLogo(homeTeamRaw);
+    String? awayTeamLogo = _extractLogo(awayTeamRaw);
+
+    final tournamentRaw =
+        json['tournament'] ?? json['league'] ?? json['League'] ?? {};
     String leagueName = '';
     String? leagueLogo;
+    String? leagueCountry;
+
+    if (tournamentRaw is Map) {
+      leagueName = tournamentRaw['name']?.toString() ??
+          tournamentRaw['uniqueName']?.toString() ??
+          '';
+      leagueLogo = tournamentRaw['logo']?.toString();
+      final category = tournamentRaw['category'];
+      if (category is Map) {
+        leagueCountry = category['name']?.toString();
+      }
+
+      final unique = tournamentRaw['uniqueTournament'];
+      if (leagueName.isEmpty && unique is Map) {
+        leagueName = unique['name']?.toString() ?? '';
+      }
+    } else if (tournamentRaw is String) {
+      leagueName = tournamentRaw;
+    }
+
+    if (leagueName.isEmpty) leagueName = sport;
+
     String? homeScore;
     String? awayScore;
 
-    if (homeTeam is Map) {
-      homeTeamName = homeTeam['name'] ?? homeTeam['Name'] ?? homeTeam['longName'] ?? '';
-      homeTeamLogo = homeTeam['logo'] ?? homeTeam['Logo'] ?? homeTeam['image'];
-    } else if (homeTeam is String) {
-      homeTeamName = homeTeam;
+    final homeScoreRaw = json['homeScore'];
+    final awayScoreRaw = json['awayScore'];
+
+    if (homeScoreRaw is Map) {
+      homeScore = homeScoreRaw['current']?.toString() ??
+          homeScoreRaw['normaltime']?.toString() ??
+          homeScoreRaw['display']?.toString();
+    } else if (homeScoreRaw is int || homeScoreRaw is double) {
+      homeScore = homeScoreRaw.toString();
+    } else if (homeScoreRaw is String) {
+      homeScore = homeScoreRaw;
     }
 
-    if (awayTeam is Map) {
-      awayTeamName = awayTeam['name'] ?? awayTeam['Name'] ?? awayTeam['longName'] ?? '';
-      awayTeamLogo = awayTeam['logo'] ?? awayTeam['Logo'] ?? awayTeam['image'];
-    } else if (awayTeam is String) {
-      awayTeamName = awayTeam;
+    if (awayScoreRaw is Map) {
+      awayScore = awayScoreRaw['current']?.toString() ??
+          awayScoreRaw['normaltime']?.toString() ??
+          awayScoreRaw['display']?.toString();
+    } else if (awayScoreRaw is int || awayScoreRaw is double) {
+      awayScore = awayScoreRaw.toString();
+    } else if (awayScoreRaw is String) {
+      awayScore = awayScoreRaw;
     }
 
-    if (league is Map) {
-      leagueName = league['name'] ?? league['Name'] ?? league['longName'] ?? '';
-      leagueLogo = league['logo'] ?? league['Logo'];
-    } else if (league is String) {
-      leagueName = league;
+    if (homeScore == null && awayScore == null) {
+      final scoreRaw = json['score'] ?? json['Score'];
+      if (scoreRaw is Map) {
+        homeScore = scoreRaw['home']?.toString() ??
+            (scoreRaw['homeScore'] is Map
+                ? scoreRaw['homeScore']['current']?.toString()
+                : scoreRaw['homeScore']?.toString());
+        awayScore = scoreRaw['away']?.toString() ??
+            (scoreRaw['awayScore'] is Map
+                ? scoreRaw['awayScore']['current']?.toString()
+                : scoreRaw['awayScore']?.toString());
+      }
     }
 
-    if (score is Map) {
-      homeScore = score['home']?.toString() ??
-          score['Home']?.toString() ??
-          score['homeScore']?.toString();
-      awayScore = score['away']?.toString() ??
-          score['Away']?.toString() ??
-          score['awayScore']?.toString();
+    String statusStr = 'scheduled';
+    final statusRaw = json['status'] ?? json['Status'];
+    if (statusRaw is Map) {
+      statusStr = statusRaw['type']?.toString() ??
+          statusRaw['description']?.toString() ??
+          'scheduled';
+    } else if (statusRaw is String) {
+      statusStr = statusRaw;
+    } else if (statusRaw is int) {
+      statusStr = _numericStatusToString(statusRaw);
     }
 
-    // Direct score fields
-    homeScore ??= json['homeScore']?.toString() ?? json['HomeScore']?.toString();
-    awayScore ??= json['awayScore']?.toString() ?? json['AwayScore']?.toString();
+    String? minute;
+    final timeRaw = json['time'] ?? json['Time'];
+    if (timeRaw is Map) {
+      final played = timeRaw['played'];
+      final injuryTime = timeRaw['injurytime'];
+      final current = timeRaw['current'];
+      if (played != null) {
+        minute = (injuryTime != null && injuryTime > 0)
+            ? "${played}+${injuryTime}'"
+            : "${played}'";
+      } else if (current != null) {
+        minute = "${current}'";
+      }
+    }
 
-    // Fallback for team names
-    if (homeTeamName.isEmpty) {
-      homeTeamName = json['homeTeamName']?.toString() ?? json['HomeTeamName']?.toString() ?? 'Home Team';
+    if (statusRaw is Map) {
+      final desc = statusRaw['description']?.toString().toLowerCase() ?? '';
+      if (desc.contains('halftime') || desc.contains('half time') || desc == 'ht') {
+        minute = 'HT';
+      }
     }
-    if (awayTeamName.isEmpty) {
-      awayTeamName = json['awayTeamName']?.toString() ?? json['AwayTeamName']?.toString() ?? 'Away Team';
-    }
-    if (leagueName.isEmpty) {
-      leagueName = json['leagueName']?.toString() ?? json['LeagueName']?.toString() ?? sport;
+    minute ??= json['minute']?.toString();
+
+    String? startTime;
+    final startTimeRaw =
+        json['startTimestamp'] ?? json['startTime'] ?? json['StartTime'] ?? json['date'];
+    if (startTimeRaw is int) {
+      startTime =
+          DateTime.fromMillisecondsSinceEpoch(startTimeRaw * 1000).toIso8601String();
+    } else if (startTimeRaw is String) {
+      startTime = startTimeRaw;
     }
 
-    final status = json['status'] ?? json['Status'] ?? json['matchStatus'] ?? 'scheduled';
-    final minute = json['minute']?.toString() ?? json['Minute']?.toString() ?? json['matchMinute']?.toString();
-    final startTime = json['startTime'] ?? json['StartTime'] ?? json['matchTime'] ?? json['date'];
+    final id = json['id']?.toString() ??
+        json['Id']?.toString() ??
+        json['matchId']?.toString() ??
+        Random().nextInt(999999).toString();
 
     return Match(
-      id: json['id']?.toString() ?? json['Id']?.toString() ?? json['matchId']?.toString() ?? Random().nextInt(999999).toString(),
+      id: id,
       homeTeam: homeTeamName,
       awayTeam: awayTeamName,
       homeTeamLogo: homeTeamLogo,
       awayTeamLogo: awayTeamLogo,
       homeScore: homeScore,
       awayScore: awayScore,
-      status: status.toString(),
+      status: statusStr,
       minute: minute,
       league: leagueName,
       leagueLogo: leagueLogo,
-      leagueCountry: json['country']?.toString() ?? json['Country']?.toString(),
-      startTime: startTime?.toString(),
+      leagueCountry: leagueCountry,
+      startTime: startTime,
       sport: sport,
     );
+  }
+
+  static String? _extractName(dynamic raw) {
+    if (raw is Map) {
+      return raw['name']?.toString() ??
+          raw['Name']?.toString() ??
+          raw['shortName']?.toString() ??
+          raw['longName']?.toString();
+    } else if (raw is String && raw.isNotEmpty) {
+      return raw;
+    }
+    return null;
+  }
+
+  static String? _extractLogo(dynamic raw) {
+    if (raw is Map) {
+      final logo = raw['logo']?.toString() ??
+          raw['Logo']?.toString() ??
+          raw['image']?.toString();
+      return (logo != null && logo.isNotEmpty) ? logo : null;
+    }
+    return null;
+  }
+
+  static String _numericStatusToString(int code) {
+
+    switch (code) {
+      case 0:
+        return 'scheduled';
+      case 6:
+      case 7:
+        return 'inprogress';
+      case 31:
+        return 'ht';
+      case 100:
+        return 'finished';
+      default:
+        return 'scheduled';
+    }
   }
 }

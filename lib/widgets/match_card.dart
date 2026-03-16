@@ -16,8 +16,10 @@ class MatchCard extends StatelessWidget {
         final isFav = fav.isFavorite(match.id);
         return GestureDetector(
           onTap: () => _showMatchDetails(context),
+
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+
             decoration: BoxDecoration(
               color: const Color(0xFF131929),
               borderRadius: BorderRadius.circular(14),
@@ -83,6 +85,7 @@ class _StatusColumn extends StatelessWidget {
 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+
               decoration: BoxDecoration(
                 color: const Color(0xFF00C853),
                 borderRadius: BorderRadius.circular(4),
@@ -97,6 +100,7 @@ class _StatusColumn extends StatelessWidget {
                   letterSpacing: 0.5,
                 ),
               ),
+
             ),
 
             if (match.minute != null) ...[
@@ -124,14 +128,15 @@ class _StatusColumn extends StatelessWidget {
         width: 52,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(4),
           ),
-          
-          child: Text(
-            match.status.toUpperCase(),
-            style: const TextStyle(
+
+          child: const Text(
+            'FT',
+            style: TextStyle(
               color: Colors.white54,
               fontSize: 9,
               fontWeight: FontWeight.w700,
@@ -139,12 +144,14 @@ class _StatusColumn extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+
         ),
       );
     }
 
     return SizedBox(
       width: 52,
+
       child: Text(
         _formatTime(match.startTime),
         style: const TextStyle(
@@ -154,6 +161,7 @@ class _StatusColumn extends StatelessWidget {
         ),
         textAlign: TextAlign.center,
       ),
+
     );
   }
 
@@ -201,16 +209,16 @@ class _TeamsColumn extends StatelessWidget {
 
   bool _isHomeWinner() {
     if (!match.isFinished) return false;
-    final h = int.tryParse(match.homeScore?.split('-').first ?? '');
-    final a = int.tryParse(match.awayScore?.split('-').first ?? '');
+    final h = int.tryParse(match.homeScore ?? '');
+    final a = int.tryParse(match.awayScore ?? '');
     if (h == null || a == null) return false;
     return h > a;
   }
 
   bool _isAwayWinner() {
     if (!match.isFinished) return false;
-    final h = int.tryParse(match.homeScore?.split('-').first ?? '');
-    final a = int.tryParse(match.awayScore?.split('-').first ?? '');
+    final h = int.tryParse(match.homeScore ?? '');
+    final a = int.tryParse(match.awayScore ?? '');
     if (h == null || a == null) return false;
     return a > h;
   }
@@ -239,6 +247,7 @@ class _TeamRow extends StatelessWidget {
         const SizedBox(width: 8),
 
         Expanded(
+
           child: Text(
             name,
             style: TextStyle(
@@ -248,9 +257,11 @@ class _TeamRow extends StatelessWidget {
             ),
             overflow: TextOverflow.ellipsis,
           ),
+
         ),
 
         if (score != null) ...[
+
           const SizedBox(width: 8),
 
           Text(
@@ -279,7 +290,6 @@ class _FavoriteButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedSwitcher(
-
         duration: const Duration(milliseconds: 200),
 
         child: Icon(
@@ -319,12 +329,12 @@ class _MatchDetailSheet extends StatelessWidget {
           const SizedBox(height: 20),
 
           Text(
-            match.league,
+            match.league.toUpperCase(),
             style: const TextStyle(
               color: Color(0xFF00C853),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
             ),
           ),
 
@@ -334,9 +344,9 @@ class _MatchDetailSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _DetailTeam(name: match.homeTeam, logoUrl: match.homeTeamLogo),
+
               Column(
                 children: [
-
                   if (match.homeScore != null && match.awayScore != null)
 
                     Text(
@@ -361,7 +371,6 @@ class _MatchDetailSheet extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   _StatusBadge(match: match),
-
                 ],
               ),
               _DetailTeam(name: match.awayTeam, logoUrl: match.awayTeamLogo),
@@ -374,7 +383,6 @@ class _MatchDetailSheet extends StatelessWidget {
             builder: (context, fav, _) {
               final isFav = fav.isFavorite(match.id);
               return OutlinedButton.icon(
-
                 onPressed: () => fav.toggleFavorite(match),
 
                 icon: Icon(
@@ -390,20 +398,24 @@ class _MatchDetailSheet extends StatelessWidget {
                 ),
 
                 style: OutlinedButton.styleFrom(
+
                   side: BorderSide(
                     color: isFav
                         ? const Color(0xFFFFD700).withOpacity(0.4)
                         : Colors.white24,
                   ),
+
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+
                 ),
               );
-              
             },
           ),
+
           const SizedBox(height: 8),
+
         ],
       ),
     );
@@ -456,6 +468,7 @@ class _StatusBadge extends StatelessWidget {
 
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+
         decoration: BoxDecoration(
           color: const Color(0xFF00C853),
           borderRadius: BorderRadius.circular(20),
@@ -469,12 +482,43 @@ class _StatusBadge extends StatelessWidget {
             fontWeight: FontWeight.w900,
           ),
         ),
-        
+
+      );
+    }
+    if (match.isFinished) {
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+
+        child: const Text(
+          'FINISHED',
+          style: TextStyle(
+            color: Colors.white54,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+
       );
     }
     return Text(
-      match.status.toUpperCase(),
-      style: const TextStyle(color: Colors.white54, fontSize: 11),
+      _formatStartTime(match.startTime),
+      style: const TextStyle(color: Colors.white54, fontSize: 13),
     );
+  }
+
+  String _formatStartTime(String? iso) {
+    if (iso == null) return 'Scheduled';
+    try {
+      final dt = DateTime.parse(iso).toLocal();
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return 'Scheduled';
+    }
   }
 }

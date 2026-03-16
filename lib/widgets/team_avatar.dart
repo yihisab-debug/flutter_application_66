@@ -29,6 +29,7 @@ class TeamAvatar extends StatelessWidget {
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => _fallback(),
           ),
+          
         ),
       );
     }
@@ -49,6 +50,7 @@ class TeamAvatar extends StatelessWidget {
       ),
 
       child: Center(
+
         child: Text(
           initials,
           style: TextStyle(

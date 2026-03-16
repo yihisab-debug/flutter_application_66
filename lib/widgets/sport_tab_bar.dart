@@ -15,28 +15,35 @@ class SportTabBar extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       height: 44,
+
       child: TabBar(
         controller: tabController,
         isScrollable: true,
         tabAlignment: TabAlignment.start,
+
         indicator: BoxDecoration(
           color: const Color(0xFF00C853),
           borderRadius: BorderRadius.circular(22),
         ),
+
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelColor: Colors.black,
         unselectedLabelColor: Colors.white60,
+
         labelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
+
         unselectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
+
         padding: EdgeInsets.zero,
         tabs: sports
+
             .map(
               (s) => Tab(
                 child: Row(
@@ -49,6 +56,7 @@ class SportTabBar extends StatelessWidget {
                 ),
               ),
             )
+            
             .toList(),
       ),
     );

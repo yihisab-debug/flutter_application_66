@@ -12,40 +12,45 @@ class SportsProvider extends ChangeNotifier {
   String? getError(String sport) => _errors[sport];
 
   Future<void> loadMatches(String sport) async {
+
     if (_loading[sport] == true) return;
+
     _loading[sport] = true;
     _errors[sport] = null;
     notifyListeners();
 
     try {
-      List<Match> matches;
-      switch (sport) {
-        case 'football':
-          matches = await SportsApiService.getFootballMatches();
-          break;
-        case 'basketball':
-          matches = await SportsApiService.getBasketballMatches();
-          break;
-        case 'tennis':
-          matches = await SportsApiService.getTennisMatches();
-          break;
-        case 'hockey':
-          matches = await SportsApiService.getHockeyMatches();
-          break;
-        default:
-          matches = [];
-      }
+      final matches = await _fetchForSport(sport);
       _matchesBySport[sport] = matches;
+      _errors[sport] = null;
     } catch (e) {
       _errors[sport] = e.toString();
-    }
 
-    _loading[sport] = false;
-    notifyListeners();
+      _matchesBySport.remove(sport);
+    } finally {
+      _loading[sport] = false;
+      notifyListeners();
+    }
   }
 
   Future<void> refreshMatches(String sport) async {
     _matchesBySport.remove(sport);
+    _errors[sport] = null;
     await loadMatches(sport);
+  }
+
+  Future<List<Match>> _fetchForSport(String sport) {
+    switch (sport) {
+      case 'football':
+        return SportsApiService.getFootballMatches();
+      case 'basketball':
+        return SportsApiService.getBasketballMatches();
+      case 'tennis':
+        return SportsApiService.getTennisMatches();
+      case 'hockey':
+        return SportsApiService.getHockeyMatches();
+      default:
+        return Future.value([]);
+    }
   }
 }

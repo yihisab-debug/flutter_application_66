@@ -34,10 +34,14 @@ class _MatchesTabState extends State<MatchesTab>
         _loadCurrentSport();
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCurrentSport());
+
+    Future.microtask(() {
+      if (mounted) _loadCurrentSport();
+    });
   }
 
   void _loadCurrentSport() {
+    if (!mounted) return;
     context.read<SportsProvider>().loadMatches(_currentSport);
   }
 
@@ -51,6 +55,7 @@ class _MatchesTabState extends State<MatchesTab>
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
+
         children: [
           _buildHeader(),
           SportTabBar(
@@ -59,6 +64,7 @@ class _MatchesTabState extends State<MatchesTab>
           ),
           Expanded(child: _buildTabViews()),
         ],
+
       ),
     );
   }
@@ -71,6 +77,7 @@ class _MatchesTabState extends State<MatchesTab>
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+
             decoration: BoxDecoration(
               color: const Color(0xFF00C853),
               borderRadius: BorderRadius.circular(8),
@@ -85,6 +92,7 @@ class _MatchesTabState extends State<MatchesTab>
                 letterSpacing: 1,
               ),
             ),
+
           ),
 
           const SizedBox(width: 10),
@@ -101,6 +109,7 @@ class _MatchesTabState extends State<MatchesTab>
           const Spacer(),
 
           Container(
+
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.06),
               borderRadius: BorderRadius.circular(10),
@@ -108,11 +117,11 @@ class _MatchesTabState extends State<MatchesTab>
 
             child: IconButton(
               icon: const Icon(Icons.refresh, color: Colors.white70, size: 20),
-              onPressed: () => context
-                  .read<SportsProvider>()
-                  .refreshMatches(_currentSport),
+              onPressed: () =>
+                  context.read<SportsProvider>().refreshMatches(_currentSport),
               tooltip: 'Refresh',
             ),
+
           ),
 
         ],
@@ -123,9 +132,7 @@ class _MatchesTabState extends State<MatchesTab>
   Widget _buildTabViews() {
     return TabBarView(
       controller: _tabController,
-      children: _sports
-          .map((s) => _SportMatchList(sport: s.id))
-          .toList(),
+      children: _sports.map((s) => _SportMatchList(sport: s.id)).toList(),
     );
   }
 }
@@ -166,7 +173,8 @@ class _SportMatchList extends StatelessWidget {
     );
   }
 
-  Widget _buildError(BuildContext ctx, String sport, SportsProvider provider) {
+  Widget _buildError(
+      BuildContext ctx, String sport, SportsProvider provider) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -224,21 +232,31 @@ class _SportMatchList extends StatelessWidget {
       grouped.putIfAbsent(m.league, () => []).add(m);
     }
 
+    final sortedEntries = grouped.entries.toList()
+      ..sort((a, b) {
+        final aHasLive = a.value.any((m) => m.isLive) ? 0 : 1;
+        final bHasLive = b.value.any((m) => m.isLive) ? 0 : 1;
+        if (aHasLive != bHasLive) return aHasLive.compareTo(bHasLive);
+        return a.key.compareTo(b.key);
+      });
+
     return RefreshIndicator(
       color: const Color(0xFF00C853),
       backgroundColor: const Color(0xFF0D1220),
-      onRefresh: () async {},
+      onRefresh: () async {
+
+      },
+
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
-
-        children: grouped.entries.map((entry) {
+        children: sortedEntries.map((entry) {
           return _LeagueSection(
             league: entry.key,
             matches: entry.value,
           );
-
         }).toList(),
       ),
+
     );
   }
 }
@@ -285,16 +303,18 @@ class _LeagueSection extends StatelessWidget {
               ),
 
               Text(
-                '${matches.length} matches',
+                '${matches.length} ${matches.length == 1 ? 'match' : 'matches'}',
                 style: const TextStyle(color: Colors.white38, fontSize: 11),
               ),
 
             ],
           ),
         ),
-        
+
         ...matches.map((m) => MatchCard(match: m)),
+
         const SizedBox(height: 4),
+
       ],
     );
   }
@@ -332,16 +352,20 @@ class _ShimmerCardState extends State<_ShimmerCard>
 
   @override
   Widget build(BuildContext context) {
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (_, __) => Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         height: 80,
+        
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(_animation.value * 0.08),
           borderRadius: BorderRadius.circular(12),
         ),
+
       ),
     );
+
   }
 }
