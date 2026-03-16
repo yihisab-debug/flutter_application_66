@@ -45,30 +45,49 @@ class SportsApiService {
           .get(url, headers: _headers)
           .timeout(const Duration(seconds: 15));
 
+      print('═══════════════════════════════════════════');
+      print('[$appSport] URL: $url');
+      print('[$appSport] STATUS: ${response.statusCode}');
+      final bodyPreview = response.body.length > 800
+          ? response.body.substring(0, 800) + '...'
+          : response.body;
+      print('[$appSport] BODY: $bodyPreview');
+      print('═══════════════════════════════════════════');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
         List<dynamic> events = [];
         if (data is Map) {
           events = data['events'] ?? data['data'] ?? data['results'] ?? [];
+          print('[$appSport] Keys in response: ${(data as Map<String, dynamic>).keys.toList()}');
+          print('[$appSport] Events count: ${events.length}');
+          if (events.isNotEmpty) {
+            print('[$appSport] First event keys: ${(events.first as Map).keys.toList()}');
+            print('[$appSport] First event: ${events.first}');
+          }
         } else if (data is List) {
           events = data;
+          print('[$appSport] Response is a List, length: ${events.length}');
         }
 
         if (events.isEmpty) {
+          print('[$appSport] No events — using mock data');
           return _getMockData(appSport);
         }
 
         final parsed = _parseMatches(events, appSport);
+        print('[$appSport] Parsed ${parsed.length} matches from ${events.length} events');
         return parsed.isEmpty ? _getMockData(appSport) : parsed;
       } else if (response.statusCode == 429) {
-
+        print('[$appSport] Rate limit (429) — using mock data');
         return _getMockData(appSport);
       } else {
+        print('[$appSport] Error ${response.statusCode} — using mock data');
         return _getMockData(appSport);
       }
     } catch (e) {
-      print('[$appSport] API error: $e');
+      print('[$appSport] Exception: $e');
       return _getMockData(appSport);
     }
   }
@@ -101,6 +120,7 @@ class SportsApiService {
         return [];
     }
   }
+
 
   static List<Match> _getMockFootballMatches() {
     final now = DateTime.now();
@@ -399,7 +419,7 @@ class SportsApiService {
         startTime: now.subtract(const Duration(minutes: 100)).toIso8601String(),
         sport: 'hockey',
       ),
-      
+
     ];
   }
 }
