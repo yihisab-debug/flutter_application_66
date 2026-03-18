@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'providers/favorites_provider.dart';
-import 'providers/sports_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/football_page.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
   runApp(const MyApp());
 }
 
@@ -14,34 +10,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      
-      providers: [
-        ChangeNotifierProvider(create: (_) => FavoritesProvider()..init()),
-        ChangeNotifierProvider(create: (_) => SportsProvider()),
-      ],
-
-      child: MaterialApp(
-        title: 'LiveScore',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF00C853),
-            brightness: Brightness.dark,
-          ),
-
-          scaffoldBackgroundColor: const Color(0xFF0A0E1A),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF0D1220),
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
-        ),
-        
-        home: const HomeScreen(),
-      ),
-
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'RapidAPI Google Tools',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomePage(),
     );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return const FootballPage();
   }
 }

@@ -1,0 +1,1 @@
+enum MatchType { past, live, upcoming }
